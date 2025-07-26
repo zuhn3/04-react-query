@@ -6,26 +6,26 @@ export interface FetchMoviesResponse {
   total_pages: number;
 }
 
+const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+const BASE_URL = 'https://api.themoviedb.org/3';
+
 export async function fetchMovies(
   query: string,
   page: number
 ): Promise<FetchMoviesResponse> {
-  const config = {
+  if (!API_KEY) {
+    throw new Error('TMDB API key is missing. Please check your environment variables.');
+  }
+
+  const response = await axios.get<FetchMoviesResponse>(`${BASE_URL}/search/movie`, {
     params: {
       query,
       include_adult: false,
       language: 'en-US',
       page,
+      api_key: API_KEY,
     },
-    headers: {
-      accept: 'application/json',
-      Authorization: `Bearer ${import.meta.env.VITE_TMDB_TOKEN}`,
-    },
-  };
+  });
 
-  const response = await axios.get<FetchMoviesResponse>(
-    'https://api.themoviedb.org/3/search/movie',
-    config
-  );
   return response.data;
 }
